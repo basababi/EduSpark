@@ -1,0 +1,20 @@
+fastapi==0.110.0
+uvicorn==0.27.1
+sqlalchemy[asyncio]==2.0.29
+asyncpg==0.29.0
+alembic==1.13.1
+pydantic==2.6.4
+pydantic-settings==2.2.1
+email-validator==2.1.1
+python-jose==3.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==3.2.2
+python-multipart==0.0.9
+redis==5.0.3
+celery==5.3.6
+tenacity==8.2.3
+httpx==0.27.0
+# orjson wheels lag for Python 3.13 on Windows; fallback to ujson if unavailable
+orjson==3.9.15; python_version < "3.13"
+ujson==5.9.0; python_version >= "3.13"
+loguru==0.7.2
