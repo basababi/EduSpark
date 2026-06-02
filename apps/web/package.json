@@ -1,13 +1,16 @@
 {
   "name": "eduspark-web",
+  "homepage": "https://basababi.github.io/my-website",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
+ "scripts": {
+  "dev": "next dev",
+  "build": "next build",
+  "start": "next start",
+  "lint": "next lint",
+  "predeploy": "npm run build",
+  "deploy": "gh-pages -d out"
+},
   "dependencies": {
     "@tanstack/react-query": "^5.28.3",
     "axios": "^1.6.8",
