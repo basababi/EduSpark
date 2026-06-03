@@ -1,28 +1,22 @@
 """add user preferences table
-
 Revision ID: 20260404_0002
 Revises: 20260318_0001
 Create Date: 2026-04-04 12:00:00
 """
-
 from typing import Sequence, Union
-
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
-
 
 revision: str = "20260404_0002"
 down_revision: Union[str, None] = "20260318_0001"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
-
 def upgrade() -> None:
     op.create_table(
         "userpreference",
-        sa.Column("user_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("interests", sa.JSON(), nullable=False),
+        sa.Column("user_id", sa.String(36), nullable=False),
+        sa.Column("interests", sa.Text(), nullable=False),
         sa.Column("email_notifications", sa.Boolean(), nullable=False),
         sa.Column("weekly_report", sa.Boolean(), nullable=False),
         sa.Column("daily_reminder", sa.Boolean(), nullable=False),
@@ -33,36 +27,28 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("user_id"),
         sa.UniqueConstraint("user_id"),
     )
-    op.execute(
-        """
-        INSERT INTO userpreference (
-            user_id,
-            interests,
-            email_notifications,
-            weekly_report,
-            daily_reminder,
-            dark_mode,
-            compact_view,
-            updated_at
-        )
-        SELECT
-            u.id,
-            '[]'::json,
-            TRUE,
-            FALSE,
-            TRUE,
-            FALSE,
-            FALSE,
-            NOW()
-        FROM "user" u
-        WHERE NOT EXISTS (
-            SELECT 1
-            FROM userpreference up
-            WHERE up.user_id = u.id
-        )
-        """
-    )
 
+    bind = op.get_bind()
+    if bind.dialect.name == 'postgresql':
+        op.execute("""
+            INSERT INTO userpreference (user_id, interests, email_notifications,
+                weekly_report, daily_reminder, dark_mode, compact_view, updated_at)
+            SELECT u.id, '[]'::json, TRUE, FALSE, TRUE, FALSE, FALSE, NOW()
+            FROM "user" u
+            WHERE NOT EXISTS (
+                SELECT 1 FROM userpreference up WHERE up.user_id = u.id
+            )
+        """)
+    else:
+        op.execute("""
+            INSERT INTO userpreference (user_id, interests, email_notifications,
+                weekly_report, daily_reminder, dark_mode, compact_view, updated_at)
+            SELECT u.id, '[]', 1, 0, 1, 0, 0, CURRENT_TIMESTAMP
+            FROM "user" u
+            WHERE NOT EXISTS (
+                SELECT 1 FROM userpreference up WHERE up.user_id = u.id
+            )
+        """)
 
 def downgrade() -> None:
     op.drop_table("userpreference")

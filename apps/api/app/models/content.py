@@ -2,18 +2,18 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
-from sqlalchemy.dialects.postgresql import UUID
+
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
 
 class Subject(Base):
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
     difficulty_level: Mapped[str | None] = mapped_column(String(20))
-    created_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow
@@ -23,8 +23,8 @@ class Subject(Base):
 
 
 class Module(Base):
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    subject_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("subject.id"))
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    subject_id: Mapped[str] = mapped_column(String(36), ForeignKey("subject.id"))
     title: Mapped[str] = mapped_column(String(150), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
     order: Mapped[int | None] = mapped_column(Integer)
@@ -34,8 +34,8 @@ class Module(Base):
 
 
 class Topic(Base):
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    module_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("module.id"))
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    module_id: Mapped[str] = mapped_column(String(36), ForeignKey("module.id"))
     title: Mapped[str] = mapped_column(String(150), nullable=False)
     objective: Mapped[str | None] = mapped_column(Text)
     difficulty: Mapped[str | None] = mapped_column(String(20))
@@ -46,8 +46,8 @@ class Topic(Base):
 
 
 class Lesson(Base):
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    topic_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("topic.id"))
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    topic_id: Mapped[str] = mapped_column(String(36), ForeignKey("topic.id"))
     title: Mapped[str] = mapped_column(String(150), nullable=False)
     summary: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
@@ -59,8 +59,8 @@ class Lesson(Base):
 
 
 class LessonContent(Base):
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    lesson_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("lesson.id"))
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    lesson_id: Mapped[str] = mapped_column(String(36), ForeignKey("lesson.id"))
     content_type: Mapped[str] = mapped_column(String(30), default="text")
     text_content: Mapped[str] = mapped_column(Text)
     source: Mapped[str | None] = mapped_column(String(50))
@@ -68,3 +68,7 @@ class LessonContent(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
 
     lesson: Mapped["Lesson"] = relationship(back_populates="contents")
+
+
+
+

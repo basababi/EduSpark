@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import case, func, select
@@ -44,14 +43,14 @@ def _evaluate_answers(
             detail="Quiz has no questions",
         )
 
-    submitted_answers: dict[UUID, str] = {}
+    submitted_answers: dict[str, str] = {}
     for item in payload.answers:
-        if item.question_id in submitted_answers:
+        if str(item.question_id) in submitted_answers:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Duplicate answers for the same question are not allowed",
             )
-        submitted_answers[item.question_id] = item.selected_answer.strip()
+        submitted_answers[str(item.question_id)] = item.selected_answer.strip()
 
     question_map = {question.id: question for question in questions}
     unknown_question_ids = [qid for qid in submitted_answers if qid not in question_map]
@@ -87,8 +86,8 @@ async def list_quizzes(
     db: AsyncSession,
     user: User,
     *,
-    subject_id: UUID | None = None,
-    topic_id: UUID | None = None,
+    subject_id: str | None = None,
+    topic_id: str | None = None,
 ) -> list[QuizListItemRead]:
     stmt = (
         select(
@@ -153,7 +152,7 @@ async def list_quizzes(
     return quizzes
 
 
-async def get_quiz_detail(db: AsyncSession, quiz_id: UUID) -> QuizDetailRead:
+async def get_quiz_detail(db: AsyncSession, quiz_id: str) -> QuizDetailRead:
     quiz_stmt = (
         select(
             Quiz.id,
@@ -211,7 +210,7 @@ async def get_quiz_detail(db: AsyncSession, quiz_id: UUID) -> QuizDetailRead:
 async def submit_quiz_attempt(
     db: AsyncSession,
     user: User,
-    quiz_id: UUID,
+    quiz_id: str,
     payload: QuizAttemptSubmitRequest,
 ) -> QuizAttemptSubmitResponse:
     quiz_stmt = (
@@ -374,3 +373,4 @@ async def get_quiz_attempt_history(
         )
         for row in attempt_rows
     ]
+
